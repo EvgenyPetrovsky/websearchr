@@ -4,12 +4,12 @@ init_yandex_search <- function(
   sort_by = c("rlv", "tm"),
   filter = c("none", "moderate", "strict")
 ) {
-
-  fun <- function(term, n, page) {
+  # function that defines stble search parameters and takes only
+  fun <- function(query, n, page) {
     yandex_search(
       user = user_name,
       key = api_key,
-      query = term,
+      query = query,
       lr = "",
       l10n = "en",
       sortby = sort_by,
@@ -76,19 +76,41 @@ yandex_search <- function(
         showmecaptcha = showmecaptcha
       )
     ) %>%
-    httr::content(as = "parsed", type = "text/xml") %>%
-    xml2::as_list()
+    httr::stop_for_status()
 
-  if (!is.null(r$yandexsearch$response$error)) {
-    stop(paste(
-      "Yandex search engine responded with error:", r$yandexsearch$response$error[[1]]
-      ))
-  } else {
-    r
+  content <- r %>%
+    httr::content(as = "parsed", type = "text/xml")
+
+  error <- content %>%
+    xml2::xml_find_first(xpath = "/yandexsearch/response/error")
+
+  if (!is.na(error)) {
+    # read error messga from response
+    err_message <- paste(
+      "Yandex search engine responded with error:",
+      xml2::xml_find_chr(error, ".")
+    )
+    stop(err_message)
   }
+
+  xpath_path = "/yandexsearch/response/results/grouping/group"
+  xpath_id = paste(xpath_path, "doc/@id", sep = "/")
+  xpath_url = paste(xpath_path, "doc/url", sep = "/")
+  xpath_title = paste(xpath_path, "doc/title", sep = "/")
+
+  df_result <- data.frame(
+    id = xml2::xml_find_all(content, xpath_id) %>% xml2::xml_text(),
+    url = xml2::xml_find_all(content, xpath_url) %>% xml2::xml_text(),
+    title = xml2::xml_find_all(content, xpath_title) %>% xml2::xml_text(),
+    stringsAsFactors = F
+  )
+
+  df_result
 }
 
 #' Describe error using code
+#'
+#' Documentation is available on \link{https://tech.yandex.com/xml/doc/dg/concepts/about-docpage/}
 yandex_error <- function(code) {
   errors <- list(
     `1` = "The query text (the value passed in the query element) contains a syntactical error. For example, a query was sent that contained only two slash symbols in a row (\"//\").",
@@ -113,4 +135,8 @@ yandex_error <- function(code) {
     `100` = "The request was most likely sent by a robot. When this error appears, a CAPTCHA must be returned to the user."
   )
   errors$code
+}
+
+handle_captcha <- function() {
+  NULL
 }
