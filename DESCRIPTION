@@ -12,4 +12,6 @@ LazyData: true
 Imports:
     httr,
     magrittr,
-    xml2
+    xml2,
+    jsonlite
+RoxygenNote: 6.1.0

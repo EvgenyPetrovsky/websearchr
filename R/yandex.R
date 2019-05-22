@@ -4,10 +4,12 @@
 #' unified search function that takes 3 parameters:
 #' query, numner of results on page and page number
 #'
-#' @export user_name Yandex user
-#' @export api_key API key given to Yandex user
-#' @export sort_by Sort mode: `rlv` - relevance, `tm` time
-#' @export filter filter mode: `none`, `moderate` or `strict`
+#' @export
+#'
+#' @param user_name Yandex user
+#' @param api_key API key given to Yandex user
+#' @param sort_by Sort mode: \code{rlv} - relevance, \code{tm} time
+#' @param filter filter mode: \code{none}, \code{moderate} or \code{strict}
 init_yandex_search <- function(
   user_name,
   api_key,
