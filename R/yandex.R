@@ -1,3 +1,13 @@
+#' Initiate yandex search
+#'
+#' Function takes more or less stable parameters and returns another
+#' unified search function that takes 3 parameters:
+#' query, numner of results on page and page number
+#'
+#' @export user_name Yandex user
+#' @export api_key API key given to Yandex user
+#' @export sort_by Sort mode: `rlv` - relevance, `tm` time
+#' @export filter filter mode: `none`, `moderate` or `strict`
 init_yandex_search <- function(
   user_name,
   api_key,
@@ -5,7 +15,7 @@ init_yandex_search <- function(
   filter = c("none", "moderate", "strict")
 ) {
   # function that defines stble search parameters and takes only
-  fun <- function(query, n, page) {
+  fun <- function(query, n = 10, page = 0) {
     yandex_search(
       user = user_name,
       key = api_key,
